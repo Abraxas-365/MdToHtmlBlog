@@ -1,0 +1,8 @@
+[package]
+name = "md_to_html"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tree-sitter = "0.19.5"
+tree-sitter-markdown = "0.7.1"

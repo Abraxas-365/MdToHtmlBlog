@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title}</title>
+    <!-- Import Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Configure Tailwind with Gruvbox colors -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gruvbox: {
+                            bg: '#282828',
+                            'bg-soft': '#32302f',
+                            fg: '#ebdbb2',
+                            'fg-dim': '#a89984',
+                            red: '#fb4934',
+                            green: '#b8bb26',
+                            yellow: '#fabd2f',
+                            blue: '#83a598',
+                            purple: '#d3869b',
+                            aqua: '#8ec07c',
+                            orange: '#fe8019',
+                            gray: '#928374'
+                        }
+                    },
+                    animation: {
+                        'blink': 'blink 1s step-end infinite'
+                    },
+                    keyframes: {
+                        blink: {
+                            '0%, 100%': {opacity: 1},
+                            '50%': {opacity: 0}
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Custom styles for markdown-specific elements -->
+    <style type="text/tailwindcss">
+        @layer utilities {
+            /* Styling for markdown heading prefixes */
+            h1::before { content: "# "; @apply text-gruvbox-orange; }
+            h2::before { content: "## "; @apply text-gruvbox-orange; }
+            h3::before { content: "### "; @apply text-gruvbox-orange; }
+            h4::before { content: "#### "; @apply text-gruvbox-orange; }
+            h5::before { content: "##### "; @apply text-gruvbox-orange; }
+            h6::before { content: "###### "; @apply text-gruvbox-orange; }
+            
+            /* List styling */
+            ul li::before { content: "- "; @apply text-gruvbox-red; }
+            ul li { @apply list-none mb-2; }
+            
+            ol { counter-reset: item; }
+            ol li { 
+                counter-increment: item;
+                @apply list-none mb-2; 
+            }
+            ol li::before { 
+                content: counter(item) ". ";
+                @apply text-gruvbox-purple font-bold; 
+            }
+            
+            /* Terminal cursor */
+            .cursor::after {
+                content: "|";
+                @apply text-gruvbox-yellow animate-blink;
+            }
+        }
+    </style>
+    
+    <!-- Optional: Add metadata from markdown -->
+    <meta name="description" content="{description}">
+    <meta name="author" content="{author}">
+</head>
+
+<body class="bg-gruvbox-bg text-gruvbox-fg font-mono leading-relaxed p-8">
+    <div class="max-w-3xl mx-auto border border-gruvbox-gray rounded-md p-8 bg-gruvbox-bg-soft shadow-lg">
+        <!-- Content gets inserted here -->
+        {content}
+    </div>
+
+    <script>
+        // Optional JavaScript for dynamic elements
+        document.addEventListener('DOMContentLoaded', function() {
+            // Any dynamic behavior can go here
+        });
+    </script>
+</body>
+
+</html>
