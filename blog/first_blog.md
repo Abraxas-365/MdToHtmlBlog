@@ -1,11 +1,11 @@
 <!--
-title: I Built My Own Markdown Blog Renderer (Because I Use Vim BTW)
+title: I Built My Own Markdown Blog Renderer (Because I Dont Know How To Exit Vim)
 date: 2025-03-12
 author: Luis Fernando Miranda
 description: How I wasted a perfectly good weekend building a blog renderer instead of, you know, actually blogging
 -->
 
-# I Built My Own Markdown Blog Renderer (Because I Dont Know How To Exit  Vim)
+# I Built My Own Markdown Blog Renderer (Because I Dont Know How To Exit Vim)
 
 Let's be honest here. Normal people use Medium or WordPress to blog. But I'm a developer, so clearly I need to spend 20 hours building my own solution instead of writing actual content. Classic.
 
@@ -45,12 +45,13 @@ let tree = parser.parse(&markdown_content, None).ok_or_else(|| {
 
 I stuck all the post info in HTML comments at the top of each file:
 
-markdown
+```markdown
 <!--
 title: Why Vim Is Better Than Your Editor
 date: 2025-03-12
 ego_boost: maximum
 -->
+```
 
 
 The program finds these and puts them where they belong in the HTML. It's like having a secretary who actually reads your notes.
@@ -96,7 +97,6 @@ After many hours of swearing at my computer (with Vim open, of course), I ended 
 
 Because no project is ever really "done," here's what I'm pretending I'll add someday:
 
-- Syntax highlighting for code (because reading plain code is for normies)
 - Caching (to make my blog load 0.01 seconds faster)
 - Search (for when I have more than two posts, which might be never)
 
@@ -110,10 +110,9 @@ Building this blog engine taught me several important things:
 
 But honestly, there's something satisfying about making your own tools. It's like that time I spent three days configuring my Vim setup to save approximately 2 seconds per day in productivity. Totally worth it.
 
-If you want to see this mess of code, check out the [GitHub repo](https://github.com/Abraxas-365/blog-renderer). Feel free to star it, fork it, or use it as an example of what not to do.
+If you want to see this mess of code, check out the [GitHub repo](https://github.com/Abraxas-365/MdToHtmlBlog). Feel free to star it, fork it, or use it as an example of what not to do.
 
 Now that I've built a whole engine, I guess I need to write some actual blog posts. Coming up next: "My .vimrc Is Better Than Yours: A Detailed Analysis."
 
-[Link to GitHub Repository][github]
+[Link to GitHub Repository](https://github.com/Abraxas-365/MdToHtmlBlog)
 
-[github]: https://github.com/Abraxas-365/blog-renderer
