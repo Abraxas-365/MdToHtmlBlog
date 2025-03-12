@@ -777,15 +777,60 @@ fn process_list_items(text: &str, html: &mut String, is_ordered: bool) {
         if is_ordered {
             if let Some(pos) = trimmed.find(". ") {
                 let content = trimmed[pos + 2..].trim();
-                html.push_str(&format!("<li>{}</li>\n", content));
+                let formatted_content = format_inline_text(content);
+                html.push_str(&format!("<li>{}</li>\n", formatted_content));
             }
         } else {
             if trimmed.starts_with("- ") || trimmed.starts_with("* ") {
                 let content = trimmed[2..].trim();
-                html.push_str(&format!("<li>{}</li>\n", content));
+                let formatted_content = format_inline_text(content);
+                html.push_str(&format!("<li>{}</li>\n", formatted_content));
             }
         }
     }
+}
+
+fn format_inline_text(text: &str) -> String {
+    let mut result = String::new();
+    let mut chars = text.chars().peekable();
+    let mut in_bold = false;
+    let mut in_italic = false;
+
+    while let Some(c) = chars.next() {
+        match c {
+            '*' => {
+                if chars.peek() == Some(&'*') {
+                    // Handle bold text
+                    chars.next(); // consume second *
+                    if in_bold {
+                        result.push_str("</strong>");
+                    } else {
+                        result.push_str("<strong class=\"font-bold\">");
+                    }
+                    in_bold = !in_bold;
+                } else {
+                    // Handle italic text
+                    if in_italic {
+                        result.push_str("</em>");
+                    } else {
+                        result.push_str("<em class=\"italic\">");
+                    }
+                    in_italic = !in_italic;
+                }
+            }
+            _ => result.push(c),
+        }
+    }
+
+    // Close any unclosed tags
+    if in_bold {
+        result.push_str("</strong>");
+    }
+    if in_italic {
+        result.push_str("</em>");
+    }
+
+    result
 }
 
 unsafe impl Send for Renderer {}

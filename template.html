@@ -46,8 +46,36 @@
     </script>
     <!-- Custom styles for markdown-specific elements -->
     <style type="text/tailwindcss">
-        @layer utilities {
-            /* Previous styles remain the same */
+
+        
+       @layer utilities {
+            /* Styling for markdown heading prefixes */
+            h1::before { content: "# "; @apply text-gruvbox-orange; }
+            h2::before { content: "## "; @apply text-gruvbox-orange; }
+            h3::before { content: "### "; @apply text-gruvbox-orange; }
+            h4::before { content: "#### "; @apply text-gruvbox-orange; }
+            h5::before { content: "##### "; @apply text-gruvbox-orange; }
+            h6::before { content: "###### "; @apply text-gruvbox-orange; }
+            
+            /* List styling */
+            ul li::before { content: "- "; @apply text-gruvbox-red; }
+            ul li { @apply list-none mb-2; }
+            
+            ol { counter-reset: item; }
+            ol li { 
+                counter-increment: item;
+                @apply list-none mb-2; 
+            }
+            ol li::before { 
+                content: counter(item) ". ";
+                @apply text-gruvbox-purple font-bold; 
+            }
+            
+            /* Terminal cursor */
+            .cursor::after {
+                content: "|";
+                @apply text-gruvbox-yellow animate-blink;
+            }
             
             /* Add custom styles for code blocks */
             pre[class*="language-"] {
@@ -99,8 +127,7 @@
         <!-- Content gets inserted here -->
         {content}
     </div>
-
-    <!-- Add Prism.js and its plugins -->
+   <!-- Add Prism.js and its plugins -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
     <!-- Add common language support -->
@@ -109,13 +136,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+  
     <script>
         // Optional JavaScript for dynamic elements
         document.addEventListener('DOMContentLoaded', function() {
             // Any dynamic behavior can go here
         });
     </script>
+        
 </body>
 
 </html>
