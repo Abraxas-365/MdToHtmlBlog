@@ -7,6 +7,9 @@
     <title>{title}</title>
     <!-- Import Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Add Prism.js CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet" />
     <!-- Configure Tailwind with Gruvbox colors -->
     <script>
         tailwind.config = {
@@ -44,32 +47,44 @@
     <!-- Custom styles for markdown-specific elements -->
     <style type="text/tailwindcss">
         @layer utilities {
-            /* Styling for markdown heading prefixes */
-            h1::before { content: "# "; @apply text-gruvbox-orange; }
-            h2::before { content: "## "; @apply text-gruvbox-orange; }
-            h3::before { content: "### "; @apply text-gruvbox-orange; }
-            h4::before { content: "#### "; @apply text-gruvbox-orange; }
-            h5::before { content: "##### "; @apply text-gruvbox-orange; }
-            h6::before { content: "###### "; @apply text-gruvbox-orange; }
+            /* Previous styles remain the same */
             
-            /* List styling */
-            ul li::before { content: "- "; @apply text-gruvbox-red; }
-            ul li { @apply list-none mb-2; }
-            
-            ol { counter-reset: item; }
-            ol li { 
-                counter-increment: item;
-                @apply list-none mb-2; 
-            }
-            ol li::before { 
-                content: counter(item) ". ";
-                @apply text-gruvbox-purple font-bold; 
+            /* Add custom styles for code blocks */
+            pre[class*="language-"] {
+                @apply my-6 rounded-lg shadow-lg;
+                background: #282828 !important; /* Gruvbox background */
             }
             
-            /* Terminal cursor */
-            .cursor::after {
-                content: "|";
-                @apply text-gruvbox-yellow animate-blink;
+            code[class*="language-"] {
+                text-shadow: none !important;
+                background: none !important;
+            }
+            
+            .token.comment,
+            .token.prolog,
+            .token.doctype,
+            .token.cdata {
+                color: #928374 !important; /* Gruvbox gray */
+            }
+            
+            .token.function {
+                color: #b8bb26 !important; /* Gruvbox green */
+            }
+            
+            .token.keyword {
+                color: #fb4934 !important; /* Gruvbox red */
+            }
+            
+            .token.string {
+                color: #b8bb26 !important; /* Gruvbox green */
+            }
+            
+            .token.number {
+                color: #d3869b !important; /* Gruvbox purple */
+            }
+            
+            .line-numbers .line-numbers-rows {
+                border-right: 1px solid #504945 !important;
             }
         }
     </style>
@@ -85,6 +100,16 @@
         {content}
     </div>
 
+    <!-- Add Prism.js and its plugins -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+    <!-- Add common language support -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-rust.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
     <script>
         // Optional JavaScript for dynamic elements
         document.addEventListener('DOMContentLoaded', function() {

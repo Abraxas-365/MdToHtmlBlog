@@ -457,6 +457,265 @@ fn convert_node_to_html(
 
             html.push_str("</p>\n");
         }
+        "link" => {
+            let mut url = "";
+            let mut text = "";
+            let mut title = "";
+
+            for i in 0..node.child_count() {
+                if let Some(child) = node.child(i) {
+                    match child.kind() {
+                        "link_text" => {
+                            if let Ok(content) = child.utf8_text(source.as_bytes()) {
+                                text = content;
+                            }
+                        }
+                        "link_destination" => {
+                            if let Ok(content) = child.utf8_text(source.as_bytes()) {
+                                url = content;
+                            }
+                        }
+                        "link_title" => {
+                            if let Ok(content) = child.utf8_text(source.as_bytes()) {
+                                title = content.trim_matches('"').trim_matches('\'');
+                            }
+                        }
+                        _ => {}
+                    }
+                }
+            }
+
+            html.push_str(&format!(
+                r#"<a href="{}" title="{}" class="text-gruvbox-blue hover:text-gruvbox-aqua">{}</a>"#,
+                url,
+                title,
+                text
+            ));
+        }
+
+        "image" => {
+            let mut url = String::new();
+            let mut alt = String::new();
+            let mut title = String::new();
+            let mut width = None;
+            let mut height = None;
+            let mut classes = String::from("max-w-full h-auto my-4 rounded-lg shadow-lg");
+            let mut style = String::new();
+
+            if let Ok(raw_text) = node.utf8_text(source.as_bytes()) {
+                if let Some(url_start) = raw_text.find('(') {
+                    if let Some(url_end) = raw_text[url_start..].find(')') {
+                        url = raw_text[url_start + 1..url_start + url_end]
+                            .trim()
+                            .to_string();
+                    }
+                }
+
+                if let Some(alt_start) = raw_text.find('[') {
+                    if let Some(alt_end) = raw_text[alt_start..].find(']') {
+                        alt = raw_text[alt_start + 1..alt_start + alt_end]
+                            .trim()
+                            .to_string();
+                    }
+                }
+
+                if let Some(title_start) = raw_text.rfind('"') {
+                    if let Some(title_end) = raw_text[..title_start].rfind('"') {
+                        title = raw_text[title_end + 1..title_start].trim().to_string();
+                    }
+                }
+            }
+
+            let start_byte = node.start_byte();
+            let preceding_text = &source[..start_byte];
+
+            if let Some(last_comment_start) = preceding_text.rfind("<!--") {
+                if let Some(comment_end) = preceding_text[last_comment_start..].find("-->") {
+                    let comment =
+                        &preceding_text[last_comment_start..last_comment_start + comment_end];
+                    let attrs = comment
+                        .trim_start_matches("<!--")
+                        .trim_end_matches("-->")
+                        .trim();
+
+                    let mut current_attr = String::new();
+                    let mut in_quotes = false;
+
+                    let mut full_attrs = Vec::new();
+                    for c in attrs.chars() {
+                        match c {
+                            '"' => {
+                                current_attr.push(c);
+                                in_quotes = !in_quotes;
+                            }
+                            ' ' if !in_quotes => {
+                                if !current_attr.is_empty() {
+                                    full_attrs.push(current_attr.clone());
+                                    current_attr.clear();
+                                }
+                            }
+                            _ => current_attr.push(c),
+                        }
+                    }
+                    if !current_attr.is_empty() {
+                        full_attrs.push(current_attr);
+                    }
+
+                    for attr in full_attrs {
+                        if let Some((key, value)) = attr.split_once('=') {
+                            let key = key.trim();
+                            let value = value.trim();
+
+                            match key {
+                                "width" => width = Some(value.trim_matches('"').to_string()),
+                                "height" => height = Some(value.trim_matches('"').to_string()),
+                                "class" => {
+                                    classes.push_str(&format!(" {}", value.trim_matches('"')))
+                                }
+                                "style" => {
+                                    if value.starts_with('"') && value.ends_with('"') {
+                                        style = value[1..value.len() - 1].to_string();
+                                    } else {
+                                        style = value.to_string();
+                                    }
+                                }
+                                "preset" => {
+                                    classes = match value.trim_matches('"') {
+                                        "avatar" => {
+                                            "w-32 h-32 rounded-full object-cover".to_string()
+                                        }
+                                        "banner" => "w-full h-64 object-cover".to_string(),
+                                        "thumbnail" => "w-48 h-48 object-cover rounded".to_string(),
+                                        _ => classes,
+                                    }
+                                }
+                                _ => debug!("Unknown image attribute: {}={}", key, value),
+                            }
+                        }
+                    }
+                }
+            }
+
+            let mut img_tag = format!(
+                r#"<img src="{}" alt="{}" title="{}" class="{}""#,
+                url, alt, title, classes
+            );
+
+            if let Some(w) = width {
+                img_tag.push_str(&format!(r#" width="{}""#, w));
+            }
+            if let Some(h) = height {
+                img_tag.push_str(&format!(r#" height="{}""#, h));
+            }
+            if !style.is_empty() {
+                img_tag.push_str(&format!(r#" style="{}""#, style));
+            }
+
+            img_tag.push('>');
+            html.push_str(&img_tag);
+        }
+
+        "strong_emphasis" | "emphasis" => {
+            let tag = if node.kind() == "strong_emphasis" {
+                "strong"
+            } else {
+                "em"
+            };
+            let class = if node.kind() == "strong_emphasis" {
+                "font-bold"
+            } else {
+                "italic"
+            };
+
+            html.push_str(&format!("<{} class=\"{}\">", tag, class));
+
+            for i in 0..node.child_count() {
+                if let Some(child) = node.child(i) {
+                    if child.kind() != "emphasis_delimiter" {
+                        convert_node_to_html(
+                            &child,
+                            source,
+                            html,
+                            link_references,
+                            current_list_key,
+                            is_first_heading,
+                            is_first_paragraph,
+                        );
+                    }
+                }
+            }
+
+            html.push_str(&format!("</{}>", tag));
+        }
+        "code" | "code_span" => {
+            if let Ok(text) = node.utf8_text(source.as_bytes()) {
+                html.push_str(&format!(
+                    r#"<code class="bg-gruvbox-bg1 text-gruvbox-yellow px-2 py-1 rounded font-mono text-sm">{}</code>"#,
+                    text
+                ));
+            }
+        }
+
+        "fenced_code_block" => {
+            let mut language = "plaintext";
+            let mut code_content = String::new();
+
+            // Extract language and code content
+            for i in 0..node.child_count() {
+                if let Some(child) = node.child(i) {
+                    match child.kind() {
+                        "info_string" => {
+                            if let Ok(lang) = child.utf8_text(source.as_bytes()) {
+                                language = lang.trim();
+                            }
+                        }
+                        "code_fence_content" => {
+                            if let Ok(content) = child.utf8_text(source.as_bytes()) {
+                                code_content = content.trim().to_string();
+                            }
+                        }
+                        _ => {}
+                    }
+                }
+            }
+
+            // Escape HTML special characters
+            let escaped_content = code_content
+                .replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&#39;");
+
+            html.push_str(&format!(
+                r#"<pre class="line-numbers"><code class="language-{}">{}</code></pre>"#,
+                language, escaped_content
+            ));
+        }
+
+        "block_quote" => {
+            html.push_str(
+                r#"<blockquote class="border-l-4 border-gruvbox-gray pl-4 my-4 italic">"#,
+            );
+
+            for i in 0..node.child_count() {
+                if let Some(child) = node.child(i) {
+                    convert_node_to_html(
+                        &child,
+                        source,
+                        html,
+                        link_references,
+                        current_list_key,
+                        is_first_heading,
+                        is_first_paragraph,
+                    );
+                }
+            }
+
+            html.push_str("</blockquote>");
+        }
+
+        // Default case
         _ => {
             if !is_list_node(node) {
                 if let Ok(text) = node.utf8_text(source.as_bytes()) {
